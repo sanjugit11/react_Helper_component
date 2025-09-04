@@ -1,0 +1,52 @@
+import React, { useEffect } from "react";
+import { useFormikContext } from "formik";
+
+const ScrollToError = () => {
+  const { submitCount, isValid, errors } = useFormikContext<any>();
+  useEffect(() => {
+    if (submitCount === 0 || isValid) return;
+
+    const fieldElements = document.querySelectorAll<HTMLElement>(
+      "input[name], select[name], textarea[name], [data-field-name]"
+    );
+
+    for (let i = 0; i < fieldElements.length; i++) {
+      const name =
+        fieldElements[i].getAttribute("name") ||
+        fieldElements[i].getAttribute("data-field-name") ||
+        "";
+
+      if (errors[name]) {
+        // scroll parent wrapper if it's a hidden file input
+        const target =
+          fieldElements[i].offsetParent !== null
+            ? fieldElements[i]
+            : fieldElements[i].closest(".upload_form, .upload-field") || fieldElements[i];
+
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        if (target instanceof HTMLElement && target.tagName !== "INPUT") {
+          target.focus?.(); // optional
+        }
+
+        break;
+      }
+    }
+  }, [submitCount, isValid, errors]);
+
+  return null;
+};
+
+export default ScrollToError;
+
+
+
+
+
+/////////////////////in the input div//////////////////
+//// mention the data-field-name //////
+
+ <div
+      className={`custom_upload ${className || ""}`}
+      data-field-name={name} // <-- important for ScrollToError
+    >

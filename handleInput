@@ -1,0 +1,53 @@
+export const handleNumberInput = (value: string): string => {
+    // Trim whitespace
+    value = value.trim();
+    // Disallow 'e' or 'E' (scientific notation)
+    if (/[eE]/.test(value)) {
+        // Remove all e/E from input but keep rest of the text
+        value = value.replace(/[eE]/g, "");
+    }
+
+    // Replace leading "." with "0."
+    if (value.startsWith(".")) {
+        value = "0" + value;
+    }
+
+    // Disallow negative numbers but keep the existing value
+    if (value.includes("-")) {
+        value = value.replace(/-/g, ""); // remove all '-' characters
+    }
+
+    // Disallow multiple decimals
+    if ((value.match(/\./g) || []).length > 1) {
+        const parts = value.split(".");
+        value = parts[0] + "." + parts.slice(1).join("").replace(/\./g, "");
+    }
+    // Disallow non-numeric characters (except one optional decimal point)
+    if (!/^\d*\.?\d*$/.test(value)) {
+        // remove any invalid character instead of clearing everything
+        value = value.replace(/[^0-9.]/g, "");
+
+        // ensure only one decimal point
+        const parts = value.split(".");
+        if (parts.length > 6) {
+            value = parts[0] + "." + parts.slice(1).join("");
+        }
+    }
+    // Disallow more than 2 digits after decimal
+    let [integerPart, decimalPart] = value.split(".");
+    if (decimalPart && decimalPart.length > 2) {
+        // trim extra digits after 2 decimals instead of clearing
+        decimalPart = decimalPart.slice(0, 2);
+        value = `${integerPart}.${decimalPart}`;
+    }
+
+    // Disallow overly long inputs
+    if (value.length > 18) return "";
+
+    // Remove leading zeros (but keep "0." or "0" intact)
+    if (integerPart.length > 1 && integerPart.startsWith("0") && !value.startsWith("0.")) {
+        value = parseFloat(value).toString();
+    }
+
+    return value;
+};
